@@ -35,6 +35,9 @@ class SecretFlyingSource(FlightSource):
         "TOS": [r"\bTOS\b", r"\bTromso\b", r"\bTromsø\b", r"特罗姆瑟"],
         "PAR": [r"\bPAR\b", r"\bParis\b", r"\bCDG\b", r"\bORY\b", r"\bBVA\b", r"巴黎"],
         "CPH": [r"\bCPH\b", r"\bCopenhagen\b", r"哥本哈根"],
+        "HEL": [r"\bHEL\b", r"\bHelsinki\b", r"赫尔辛基"],
+        "ARN": [r"\bARN\b", r"\bStockholm\b", r"斯德哥尔摩"],
+        "TLL": [r"\bTLL\b", r"\bTallinn\b", r"塔林"],
     }
 
     ROUND_TRIP_PATTERNS = [
@@ -146,6 +149,9 @@ class SecretFlyingSource(FlightSource):
         "PAR": "PAR",
         "TOS": "TOS",
         "CPH": "CPH",
+        "HEL": "HEL",
+        "ARN": "ARN",
+        "TLL": "TLL",
         "HKG": "HKG",
         "SZX": "SZX",
         "CAN": "CAN",
@@ -153,6 +159,7 @@ class SecretFlyingSource(FlightSource):
 
     DESTINATION_BY_CODE = {
         "AMS": ("Amsterdam AMS", "Netherlands"),
+        "ARN": ("Stockholm ARN", "Sweden"),
         "ATH": ("Athens ATH", "Greece"),
         "BCN": ("Barcelona BCN", "Spain"),
         "BER": ("Berlin BER", "Germany"),

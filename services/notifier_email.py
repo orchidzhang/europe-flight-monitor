@@ -23,6 +23,9 @@ ORIGIN_LABELS = {
     "TOS": "特罗姆瑟 TOS",
     "PAR": "巴黎 PAR",
     "CPH": "哥本哈根 CPH",
+    "HEL": "赫尔辛基 HEL",
+    "ARN": "斯德哥尔摩 ARN",
+    "TLL": "塔林 TLL",
 }
 
 
