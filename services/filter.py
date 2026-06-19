@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import date
 
 from models.flight import FlightDeal
@@ -9,6 +10,39 @@ ALLOWED_ORIGINS = {"HKG", "SZX", "CAN"}
 MAX_PRICE_CNY = 4000
 DEPARTURE_BEFORE = date.fromisoformat("2026-10-05")
 ALLOWED_TRIP_TYPES = {"round_trip", "open_jaw"}
+
+
+@dataclass(frozen=True)
+class RouteAlert:
+    name: str
+    origin: str
+    destinations: set[str]
+    start_date: date
+    end_date: date
+    max_price_cny: int
+    trip_types: set[str]
+
+
+ROUTE_ALERTS = [
+    RouteAlert(
+        name="TOS to Tallinn or Helsinki, February 2027",
+        origin="TOS",
+        destinations={"TLL", "HEL"},
+        start_date=date.fromisoformat("2027-02-01"),
+        end_date=date.fromisoformat("2027-03-01"),
+        max_price_cny=500,
+        trip_types={"one_way"},
+    ),
+    RouteAlert(
+        name="Paris to Hamburg, late January 2027",
+        origin="PAR",
+        destinations={"HAM"},
+        start_date=date.fromisoformat("2027-01-20"),
+        end_date=date.fromisoformat("2027-02-01"),
+        max_price_cny=300,
+        trip_types={"one_way"},
+    ),
+]
 
 EXCLUDED_COUNTRIES = {
     "United Kingdom",
@@ -69,6 +103,9 @@ EUROPE_COUNTRIES = {
 
 
 def is_valid_deal(deal: FlightDeal) -> bool:
+    if matches_route_alert(deal):
+        return True
+
     if deal.origin not in ALLOWED_ORIGINS:
         return False
 
@@ -90,6 +127,33 @@ def is_valid_deal(deal: FlightDeal) -> bool:
         return False
 
     return departure < DEPARTURE_BEFORE
+
+
+def matches_route_alert(deal: FlightDeal) -> bool:
+    try:
+        departure = date.fromisoformat(deal.departure_date)
+    except ValueError:
+        return False
+
+    for alert in ROUTE_ALERTS:
+        if deal.origin != alert.origin:
+            continue
+        if not _destination_matches(deal.destination, alert.destinations):
+            continue
+        if not alert.start_date <= departure < alert.end_date:
+            continue
+        if deal.price_cny <= 0 or deal.price_cny > alert.max_price_cny:
+            continue
+        if deal.trip_type not in alert.trip_types:
+            continue
+        return True
+
+    return False
+
+
+def _destination_matches(destination: str, allowed_codes: set[str]) -> bool:
+    value = destination.upper()
+    return any(code in value.split() or value == code for code in allowed_codes)
 
 
 def filter_deals(deals: list[FlightDeal]) -> list[FlightDeal]:

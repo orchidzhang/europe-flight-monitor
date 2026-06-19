@@ -32,6 +32,8 @@ class SecretFlyingSource(FlightSource):
         "HKG": [r"\bHKG\b", r"\bHong Kong\b", r"香港"],
         "SZX": [r"\bSZX\b", r"\bShenzhen\b", r"深圳"],
         "CAN": [r"\bCAN\b", r"\bGuangzhou\b", r"广州"],
+        "TOS": [r"\bTOS\b", r"\bTromso\b", r"\bTromsø\b", r"特罗姆瑟"],
+        "PAR": [r"\bPAR\b", r"\bParis\b", r"\bCDG\b", r"\bORY\b", r"\bBVA\b", r"巴黎"],
     }
 
     ROUND_TRIP_PATTERNS = [
@@ -50,6 +52,14 @@ class SecretFlyingSource(FlightSource):
         r"异地返回",
     ]
 
+    ONE_WAY_PATTERNS = [
+        r"\bone way\b",
+        r"\bone-way\b",
+        r"\boneway\b",
+        r"\bsingle\b",
+        r"单程",
+    ]
+
     COUNTRY_PATTERNS = {
         "Albania": ["Albania", "阿尔巴尼亚"],
         "Andorra": ["Andorra", "安道尔"],
@@ -62,10 +72,10 @@ class SecretFlyingSource(FlightSource):
         "Cyprus": ["Cyprus", "塞浦路斯"],
         "Czech Republic": ["Czech", "Czechia", "Prague", "捷克", "布拉格"],
         "Denmark": ["Denmark", "Copenhagen", "丹麦", "哥本哈根"],
-        "Estonia": ["Estonia", "Tallinn", "爱沙尼亚", "塔林"],
-        "Finland": ["Finland", "Helsinki", "芬兰", "赫尔辛基"],
+        "Estonia": ["Estonia", "Tallinn", "TLL", "爱沙尼亚", "塔林"],
+        "Finland": ["Finland", "Helsinki", "HEL", "芬兰", "赫尔辛基"],
         "France": ["France", "Paris", "Nice", "Lyon", "法国", "巴黎", "尼斯", "里昂"],
-        "Germany": ["Germany", "Frankfurt", "Munich", "Berlin", "Dusseldorf", "德国", "法兰克福", "慕尼黑", "柏林", "杜塞尔多夫"],
+        "Germany": ["Germany", "Frankfurt", "Munich", "Berlin", "Dusseldorf", "Hamburg", "HAM", "德国", "法兰克福", "慕尼黑", "柏林", "杜塞尔多夫", "汉堡"],
         "Greece": ["Greece", "Athens", "Santorini", "希腊", "雅典", "圣托里尼"],
         "Hungary": ["Hungary", "Budapest", "匈牙利", "布达佩斯"],
         "Iceland": ["Iceland", "Reykjavik", "冰岛", "雷克雅未克"],
@@ -82,7 +92,7 @@ class SecretFlyingSource(FlightSource):
         "Montenegro": ["Montenegro", "黑山"],
         "Netherlands": ["Netherlands", "Amsterdam", "Holland", "荷兰", "阿姆斯特丹"],
         "North Macedonia": ["Macedonia", "Skopje", "北马其顿"],
-        "Norway": ["Norway", "Oslo", "挪威", "奥斯陆"],
+        "Norway": ["Norway", "Oslo", "Tromso", "Tromsø", "TOS", "挪威", "奥斯陆", "特罗姆瑟"],
         "Poland": ["Poland", "Warsaw", "Krakow", "波兰", "华沙", "克拉科夫"],
         "Portugal": ["Portugal", "Lisbon", "Porto", "葡萄牙", "里斯本", "波尔图"],
         "Romania": ["Romania", "Bucharest", "罗马尼亚", "布加勒斯特"],
@@ -109,6 +119,7 @@ class SecretFlyingSource(FlightSource):
         "Frankfurt FRA": ["Frankfurt", "FRA", "法兰克福"],
         "Geneva GVA": ["Geneva", "GVA", "日内瓦"],
         "Helsinki HEL": ["Helsinki", "HEL", "赫尔辛基"],
+        "Hamburg HAM": ["Hamburg", "HAM", "汉堡"],
         "Istanbul IST": ["Istanbul", "IST", "伊斯坦布尔"],
         "Lisbon LIS": ["Lisbon", "LIS", "里斯本"],
         "Madrid MAD": ["Madrid", "MAD", "马德里"],
@@ -119,9 +130,47 @@ class SecretFlyingSource(FlightSource):
         "Prague PRG": ["Prague", "PRG", "布拉格"],
         "Rome FCO": ["Rome", "FCO", "罗马"],
         "Stockholm ARN": ["Stockholm", "ARN", "斯德哥尔摩"],
+        "Tallinn TLL": ["Tallinn", "TLL", "塔林"],
+        "Tromso TOS": ["Tromso", "Tromsø", "TOS", "特罗姆瑟"],
         "Vienna VIE": ["Vienna", "VIE", "维也纳"],
         "Warsaw WAW": ["Warsaw", "WAW", "华沙"],
         "Zurich ZRH": ["Zurich", "ZRH", "苏黎世"],
+    }
+
+    AIRPORT_CODE_ALIASES = {
+        "BVA": "PAR",
+        "CDG": "PAR",
+        "ORY": "PAR",
+        "PAR": "PAR",
+        "TOS": "TOS",
+        "HKG": "HKG",
+        "SZX": "SZX",
+        "CAN": "CAN",
+    }
+
+    DESTINATION_BY_CODE = {
+        "AMS": ("Amsterdam AMS", "Netherlands"),
+        "ATH": ("Athens ATH", "Greece"),
+        "BCN": ("Barcelona BCN", "Spain"),
+        "BER": ("Berlin BER", "Germany"),
+        "BRU": ("Brussels BRU", "Belgium"),
+        "CDG": ("Paris CDG", "France"),
+        "CPH": ("Copenhagen CPH", "Denmark"),
+        "FRA": ("Frankfurt FRA", "Germany"),
+        "GVA": ("Geneva GVA", "Switzerland"),
+        "HAM": ("Hamburg HAM", "Germany"),
+        "HEL": ("Helsinki HEL", "Finland"),
+        "IST": ("Istanbul IST", "Turkey"),
+        "LIS": ("Lisbon LIS", "Portugal"),
+        "MAD": ("Madrid MAD", "Spain"),
+        "MXP": ("Milan MXP", "Italy"),
+        "MUC": ("Munich MUC", "Germany"),
+        "OSL": ("Oslo OSL", "Norway"),
+        "PRG": ("Prague PRG", "Czech Republic"),
+        "TLL": ("Tallinn TLL", "Estonia"),
+        "VIE": ("Vienna VIE", "Austria"),
+        "WAW": ("Warsaw WAW", "Poland"),
+        "ZRH": ("Zurich ZRH", "Switzerland"),
     }
 
     def __init__(self, timeout: int = 30, limit: int = 30) -> None:
@@ -237,11 +286,11 @@ class SecretFlyingSource(FlightSource):
 
     def _parse_article(self, article: Article, raw_text: str) -> FlightDeal | None:
         origin = self._detect_origin(raw_text)
-        destination_country = self._detect_country(raw_text)
+        destination = self._detect_destination(raw_text)
+        destination_country = self._detect_country(raw_text, destination)
         price_cny, currency = self._detect_price(raw_text)
         departure_date, return_date = self._detect_dates(raw_text)
         trip_type = self._detect_trip_type(raw_text)
-        destination = self._detect_destination(raw_text, destination_country)
 
         if not all([origin, destination_country, price_cny, departure_date, trip_type]):
             return None
@@ -262,28 +311,56 @@ class SecretFlyingSource(FlightSource):
         )
 
     def _detect_origin(self, text: str) -> str:
+        match = re.search(r"[?&](?:origin|origin0)=([A-Z]{3,4})", text, flags=re.IGNORECASE)
+        if match:
+            code = match.group(1).upper()[:3]
+            alias = self.AIRPORT_CODE_ALIASES.get(code)
+            if alias:
+                return alias
+
         for code, patterns in self.ORIGIN_PATTERNS.items():
             if self._contains_any(text, patterns):
                 return code
         return ""
 
-    def _detect_country(self, text: str) -> str:
+    def _detect_country(self, text: str, destination: str = "") -> str:
+        destination_code = self._airport_code_from_destination(destination)
+        if destination_code in self.DESTINATION_BY_CODE:
+            return self.DESTINATION_BY_CODE[destination_code][1]
+
         for country, patterns in self.COUNTRY_PATTERNS.items():
             if self._contains_any(text, patterns):
                 return country
         return ""
 
-    def _detect_destination(self, text: str, country: str) -> str:
+    def _detect_destination(self, text: str) -> str:
+        match = re.search(r"[?&](?:destination|destination0)=([A-Z]{3,4})", text, flags=re.IGNORECASE)
+        if match:
+            code = match.group(1).upper()[:3]
+            if code in self.DESTINATION_BY_CODE:
+                return self.DESTINATION_BY_CODE[code][0]
+
+        for city, patterns in self.AIRPORT_CITY_PATTERNS.items():
+            for pattern in patterns:
+                if re.search(rf"\bto\s+{re.escape(pattern)}\b", text, flags=re.IGNORECASE):
+                    return city
+
         for city, patterns in self.AIRPORT_CITY_PATTERNS.items():
             if self._contains_any(text, patterns):
                 return city
-        return country
+        return ""
 
     def _detect_trip_type(self, text: str) -> str:
         if self._contains_any(text, self.OPEN_JAW_PATTERNS):
             return "open_jaw"
         if self._contains_any(text, self.ROUND_TRIP_PATTERNS):
             return "round_trip"
+        if self._contains_any(text, self.ONE_WAY_PATTERNS):
+            return "one_way"
+        if re.search(r"[?&](?:date|date0|outboundDate)=", text, flags=re.IGNORECASE) and not re.search(
+            r"[?&](?:inboundDate|date1|rtn=1)\b", text, flags=re.IGNORECASE
+        ):
+            return "one_way"
         return ""
 
     def _detect_price(self, text: str) -> tuple[int, str]:
@@ -339,8 +416,8 @@ class SecretFlyingSource(FlightSource):
         dates: list[date] = []
 
         numeric_patterns = [
-            r"\b(2026)[-/\.](0?[1-9]|1[0-2])[-/\.](0?[1-9]|[12]\d|3[01])\b",
-            r"\b(0?[1-9]|[12]\d|3[01])[-/\.](0?[1-9]|1[0-2])[-/\.](2026)\b",
+            r"\b(2026|2027)[-/\.](0?[1-9]|1[0-2])[-/\.](0?[1-9]|[12]\d|3[01])\b",
+            r"\b(0?[1-9]|[12]\d|3[01])[-/\.](0?[1-9]|1[0-2])[-/\.](2026|2027)\b",
         ]
         for pattern in numeric_patterns:
             for match in re.finditer(pattern, text):
@@ -355,7 +432,7 @@ class SecretFlyingSource(FlightSource):
             "Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|"
             "Aug|August|Sep|Sept|September|Oct|October|Nov|November|Dec|December"
         )
-        month_pattern = rf"\b(?P<day>[0-3]?\d)\s+(?P<month>{month_names})\s+(?P<year>2026)\b|\b(?P<month2>{month_names})\s+(?P<day2>[0-3]?\d),?\s+(?P<year2>2026)\b"
+        month_pattern = rf"\b(?P<day>[0-3]?\d)\s+(?P<month>{month_names})\s+(?P<year>2026|2027)\b|\b(?P<month2>{month_names})\s+(?P<day2>[0-3]?\d),?\s+(?P<year2>2026|2027)\b"
         for match in re.finditer(month_pattern, text, flags=re.IGNORECASE):
             if match.group("year"):
                 parsed = dateparser.parse(match.group(0), languages=["en"])
@@ -372,6 +449,11 @@ class SecretFlyingSource(FlightSource):
             dates.append(date(year, month, day))
         except ValueError:
             pass
+
+    @staticmethod
+    def _airport_code_from_destination(destination: str) -> str:
+        match = re.search(r"\b([A-Z]{3})\b", destination.upper())
+        return match.group(1) if match else ""
 
     @staticmethod
     def _contains_any(text: str, patterns: Iterable[str]) -> bool:

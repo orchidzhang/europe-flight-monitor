@@ -13,12 +13,15 @@ DEFAULT_EMAIL_TO = "orchidzhang@outlook.com"
 TRIP_TYPE_LABELS = {
     "round_trip": "往返",
     "open_jaw": "开口",
+    "one_way": "单程",
 }
 
 ORIGIN_LABELS = {
     "HKG": "香港 HKG",
     "SZX": "深圳 SZX",
     "CAN": "广州 CAN",
+    "TOS": "特罗姆瑟 TOS",
+    "PAR": "巴黎 PAR",
 }
 
 
