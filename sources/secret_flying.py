@@ -26,6 +26,7 @@ class Article:
 class SecretFlyingSource(FlightSource):
     name = "Secret Flying"
     feed_url = "https://www.secretflying.com/feed/"
+    home_url = "https://www.secretflying.com/"
 
     ORIGIN_PATTERNS = {
         "HKG": [r"\bHKG\b", r"\bHong Kong\b", r"香港"],
@@ -142,7 +143,7 @@ class SecretFlyingSource(FlightSource):
         deals: list[FlightDeal] = []
 
         for article in articles[: self.limit]:
-            text = self._fetch_article_text(article.url)
+            text = "" if "skyscanner." in article.summary else self._fetch_article_text(article.url)
             raw_text = self._clean_text(f"{article.title}\n{article.summary}\n{text}")
             deal = self._parse_article(article, raw_text)
             if deal is not None:
@@ -151,8 +152,15 @@ class SecretFlyingSource(FlightSource):
         return deals
 
     def _fetch_feed(self) -> list[Article]:
-        response = self.session.get(self.feed_url, timeout=self.timeout)
-        response.raise_for_status()
+        try:
+            response = self.session.get(self.feed_url, timeout=self.timeout)
+            response.raise_for_status()
+            if self._is_cloudflare_challenge(response.text):
+                raise requests.RequestException("Cloudflare challenge returned for RSS feed")
+        except requests.RequestException as exc:
+            print(f"RSS feed unavailable, falling back to homepage cards: {exc}")
+            return self._fetch_homepage_articles()
+
         soup = BeautifulSoup(response.content, "xml")
 
         articles: list[Article] = []
@@ -165,10 +173,54 @@ class SecretFlyingSource(FlightSource):
 
         return articles
 
+    def _fetch_homepage_articles(self) -> list[Article]:
+        response = self.session.get(self.home_url, timeout=self.timeout)
+        response.raise_for_status()
+        if self._is_cloudflare_challenge(response.text):
+            raise RuntimeError("Secret Flying homepage returned a Cloudflare challenge")
+
+        soup = BeautifulSoup(response.text, "html.parser")
+        articles: list[Article] = []
+        seen_urls: set[str] = set()
+
+        for card in soup.find_all("article"):
+            post_links = [
+                link.get("href", "").strip()
+                for link in card.find_all("a")
+                if "/posts/" in link.get("href", "")
+            ]
+            if not post_links:
+                continue
+
+            url = post_links[0]
+            if url in seen_urls:
+                continue
+            seen_urls.add(url)
+
+            title_node = card.find(["h1", "h2", "h3"])
+            title = title_node.get_text(" ", strip=True) if title_node else ""
+            summary = card.get_text(" ", strip=True)
+            href_text = " ".join(post_links)
+            skyscanner_links = [
+                link.get("href", "").strip()
+                for link in card.find_all("a")
+                if "skyscanner." in link.get("href", "")
+            ]
+            if skyscanner_links:
+                href_text = f"{href_text} {' '.join(skyscanner_links)}"
+
+            if title and url:
+                articles.append(Article(title=title, url=url, summary=f"{summary} {href_text}"))
+
+        print(f"Found {len(articles)} homepage cards from Secret Flying.")
+        return articles
+
     def _fetch_article_text(self, url: str) -> str:
         try:
             response = self.session.get(url, timeout=self.timeout)
             response.raise_for_status()
+            if self._is_cloudflare_challenge(response.text):
+                raise requests.RequestException("Cloudflare challenge returned for article")
         except requests.RequestException as exc:
             print(f"Failed to fetch article {url}: {exc}")
             return ""
@@ -335,3 +387,8 @@ class SecretFlyingSource(FlightSource):
     @staticmethod
     def _clean_text(text: str) -> str:
         return re.sub(r"\s+", " ", unescape(text)).strip()
+
+    @staticmethod
+    def _is_cloudflare_challenge(text: str) -> bool:
+        lower_text = text.lower()
+        return "just a moment" in lower_text and "cloudflare" in lower_text

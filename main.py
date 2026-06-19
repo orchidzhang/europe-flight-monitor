@@ -12,12 +12,20 @@ def run() -> int:
     ]
 
     all_deals = []
+    failed_sources = 0
     for source in sources:
         print(f"Fetching deals from {source.name}...")
         try:
-            all_deals.extend(source.fetch())
+            source_deals = source.fetch()
+            all_deals.extend(source_deals)
+            print(f"{source.name} returned {len(source_deals)} normalized deals.")
         except Exception as exc:
+            failed_sources += 1
             print(f"Source failed: {source.name}: {exc}")
+
+    if failed_sources == len(sources):
+        print("All sources failed. Marking this run as failed.")
+        return 1
 
     print(f"Fetched {len(all_deals)} normalized deals.")
 
