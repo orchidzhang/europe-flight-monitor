@@ -22,6 +22,7 @@ ORIGIN_LABELS = {
     "CAN": "广州 CAN",
     "TOS": "特罗姆瑟 TOS",
     "PAR": "巴黎 PAR",
+    "CPH": "哥本哈根 CPH",
 }
 
 

@@ -42,6 +42,15 @@ ROUTE_ALERTS = [
         max_price_cny=300,
         trip_types={"one_way"},
     ),
+    RouteAlert(
+        name="Copenhagen to Evenes, February 1-5 2027",
+        origin="CPH",
+        destinations={"EVE"},
+        start_date=date.fromisoformat("2027-02-01"),
+        end_date=date.fromisoformat("2027-02-06"),
+        max_price_cny=600,
+        trip_types={"one_way"},
+    ),
 ]
 
 EXCLUDED_COUNTRIES = {
